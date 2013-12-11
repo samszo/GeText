@@ -17,21 +17,5 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
 		return $moduleLoader;
 	}
 
-	protected function _initViewHelpers()
-	{
-	    $this->bootstrap('layout');
-	    $layout = $this->getResource('layout');
-	    $view = $layout->getView();
-	    $view->doctype('XHTML1_STRICT');
-	    $view->headMeta()->appendHttpEquiv('Content-Type', 'text/html;charset=utf-8');
-	    $view->headTitle()->setSeparator(' - ');
-	    $view->headTitle('Generateur');
-	    
-		$view->addHelperPath('ZendX/JQuery/View/Helper/', 'ZendX_JQuery_View_Helper');
-		$viewRenderer = new Zend_Controller_Action_Helper_ViewRenderer();
-		$viewRenderer->setView($view);
-		Zend_Controller_Action_HelperBroker::addHelper($viewRenderer);	    
-	}	
-
 }
 
