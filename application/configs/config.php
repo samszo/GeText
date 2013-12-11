@@ -1,10 +1,8 @@
 <?php
 date_default_timezone_set('Europe/Paris');
-ini_set("memory_limit",'1600M');
 
-define ("WEB_ROOT","http://localhost/generateur");
-define ("ROOT_PATH","/Applications/XAMPP/xamppfiles/htdocs/generateur");
-define ("WEB_ROOT_AJAX",WEB_ROOT."/public");
+define ("WEB_ROOT","http://localhost/GeText");
+define ("ROOT_PATH","/Applications/XAMPP/xamppfiles/htdocs/GeText");
 
 
 // Define path to application directory
