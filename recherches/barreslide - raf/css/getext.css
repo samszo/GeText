@@ -4,9 +4,12 @@
     src: url('font/OpenSans-Regular.ttf');
 }
 
+body {
+	font-family: opensans;
+}
 #interface {
 
-	width:300px;
+	width:400px;
 	background-color: #EEE;
 	padding: 20px;
 	margin-left: auto;
@@ -15,19 +18,30 @@
 	text-align: center;
 	font-family: opensans;
 
+
 }
 .slide {
 
 	width:80%;
-	height:20px;
+	height:40px;
 	margin:10px;
+	display: inline-block;
+
 
 }
 .cursor {
 
 	width:20%;
-	height:100%;
+	height:30px;
+	padding-top: 10px;
 	cursor: pointer;
+	color:#FFF;
+	font-family: opensans;
+	font-size: 25px;
+	text-align: center;
+	vertical-align: middle;
+
+	
 	
 }
 .p {
@@ -36,7 +50,10 @@
 	margin-left: auto;
 	margin-right: auto;
 	color:#000;
-	font-size: 18px;
+	font-size: 20px;
+	display: inline-block;
+	font-family: opensans;
+
 }
 #slide1 {
 	background-color: #EAE;
