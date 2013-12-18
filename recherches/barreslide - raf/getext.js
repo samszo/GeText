@@ -21,7 +21,7 @@ $( cursor ).on( "drag", function( event, ui ) {
 
 var posx = $(cursor).css("left"); //position en pixel :
 var posx = posx.replace('px', ''); //enlever le 'px'
-var posx = posx/22.4; // la position passe de 0->224 à 0->10
+var posx = posx/20.5; // la position passe de 0->224 à 0->10
 var posx = Math.floor(posx); // on enlèvre la partie décimale
 
 
