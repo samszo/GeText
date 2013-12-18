@@ -51,10 +51,11 @@
 	background-color: #C0F;
 }
 #slide3 {
-	background-color: #EAE;
+	background: linear-gradient(to right, rgb(231,197,234) 0%,rgb(168,229,248) 100%);
 }
 #cursor3 {
 	background-color: #F0C;
+	left: 96px;
 }
 #slide4 {
 	background-color: #AEE;
