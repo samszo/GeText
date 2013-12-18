@@ -9,7 +9,7 @@ body {
 }
 #interface {
 
-	width:400px;
+	width:350px;
 	background-color: #EEE;
 	padding: 20px;
 	margin-left: auto;
@@ -32,14 +32,16 @@ body {
 .cursor {
 
 	width:20%;
-	height:30px;
-	padding-top: 10px;
+	height:35px;
+	padding-top: 5px;
 	cursor: pointer;
 	color:#FFF;
 	font-family: opensans;
 	font-size: 25px;
 	text-align: center;
 	vertical-align: middle;
+	border-radius: 0px;
+
 
 	
 	
