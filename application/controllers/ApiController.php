@@ -10,7 +10,8 @@ class ApiController extends Zend_Controller_Action
 
     public function gettextAction()
     {
-    	$this->view->triste =  $this->_getParam('triste', 0);
+    	$this->view->triste = $this->_getParam('triste', 0);
+    	$this->view->rock = $this->_getParam('rock');
     	
     }
 
