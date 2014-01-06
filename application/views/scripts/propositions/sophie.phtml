@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>GeText</title>
+	<style type="text/css">
+	html {
+	    height: 100%;
+	}
+	body {
+	    height: 100%;
+	    margin: 0;
+	    padding: 0;
+		background-color:white;
+	}
+	.page-table {
+	    height: 100%;
+	    width: 100%;
+	    border-collapse: collapse;
+	    text-align: center;
+	}
+	.page-td {
+	    height: 100%;
+	    padding: 0;
+	    vertical-align: middle;
+	}
+	div.global {
+	    width: 300px;
+	    margin: 20px auto;
+	    text-align: left;
+	}
+	@font-face { 
+	          font-family: Liberation; 
+	          src: url(../../public/fonts/LiberationMono-Regular.ttf) format("truetype");
+	     }
+		
+	</style>
+    <script type="text/javascript">
+	    var toChoix;
+		//merci à http://stackoverflow.com/questions/3163615/how-to-scroll-html-page-to-given-anchor-using-jquery-or-javascript
+    	function scrollTo(hash) {
+	        location.hash = "#" + hash;
+	        clearInterval(toChoix);
+	    }
+	    function init(){
+	    	toChoix=setInterval(function(){scrollTo("choix")},3000);
+	    }
+    </script>
+  </head>
+  <body onload="init()">
+	<table id="accueil" class="page-table"><tr><td class="page-td">
+	    <div id="global" style="background-color:green;">
+			<div style="text-align:center;" onclick="scrollTo('choix')">GeText</div>
+	    </div><!-- #global -->
+	</td></tr></table>
+	<table id="choix" class="page-table"><tr><td class="page-td">
+	    <div class="global" style="background-color:yellow;">
+			<div style="text-align:center;" onclick="scrollTo('texte')">Mes choix</div>
+	    </div><!-- #global -->
+	</td></tr></table>
+	<table id="texte" class="page-table"><tr><td class="page-td">
+	    <div class="global" style="background-color:red;">
+			<div style="text-align:center;">Texte</div>
+	    </div><!-- #global -->
+	</td></tr></table>
+
+  </body>
+</html>
