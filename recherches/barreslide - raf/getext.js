@@ -3,13 +3,13 @@
 function go() {
 		// lancement des fonctions avec les paramètres correspondant
 		// à chaque curseur
-		draggable (1,"#cursor1", "#p1", 'triste',"#slide1","#pi1");
-		draggable (2,"#cursor2", "#p2", 'sentimental',"#slide2","#pi2");
-		draggable (3,"#cursor3", "#p3", 'rauque',"#slide3","#pi3");
-		draggable (4,"#cursor4", "#p4", 'régulier',"#slide4","#pi4");
+		draggable (1,"#cursor1", "#p1", 'triste',"#slide1","#pi1", "#compteur1");
+		draggable (2,"#cursor2", "#p2", 'sentimental',"#slide2","#pi2", "#compteur2");
+		draggable (3,"#cursor3", "#p3", 'rauque',"#slide3","#pi3", "#compteur3");
+		draggable (4,"#cursor4", "#p4", 'régulier',"#slide4","#pi4", "#compteur4");
 
 
-function draggable(number,cursor, p, feeling, slide, pi) {
+function draggable(number,cursor, p, feeling, slide, pi, compteur) {
 
 
 // fonction draggable avec jquery, su l'axe X
@@ -26,7 +26,7 @@ var posx = Math.floor(posx); // on enlèvre la partie décimale
 
 
 // On écrit la variable dans le paragraphe correspondant
-$(cursor).html(posx);
+$(compteur).html(posx);
 
 
 } );
