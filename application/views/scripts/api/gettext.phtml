@@ -1,3 +1,26 @@
-c'est là qu'va y'avoir le texte qui a pour paramètres :
-- tristesse : <?php echo $this->triste; ?>
-- rock : <?php echo $this->rock; ?>
+<?php
+	if($this->json){
+		echo json_encode($this->stats);
+		return ;
+	}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>GeText : texte généré</title>
+</head>
+<body>
+<h1>GeText : texte généré</h1>
+<?php
+	echo "<h2>Paramètres</h2>";
+	foreach ($this->params as $k => $v) {
+		if($k!="texte")
+			echo "<h3>".$k." = ".$v."</h3>";
+	}
+	echo "<h2>Le texte généré :</h2>";
+	echo "<p>".$this->params['texte']."</p>";
+	
+	?>
+</body>
+</html>	
