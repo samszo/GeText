@@ -1,3 +1,27 @@
-<?php  
-echo "Voici la listes des propositions";
+<?php
+	if($this->json){
+		echo json_encode($this->stats);
+		return ;
+	}
 ?>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>GeText : propositions disponibles</title>
+</head>
+<body>
+<h1>GeText : propositions disponibles</h1>
+<?php
+	$niv = "";
+	foreach($this->data as $s){
+		if($niv!=$s["niv"]){
+			echo "<h2>".$s["niv"]."</h2>";
+			$niv=$s["niv"];
+		}
+		echo "<a href='".$s["lien"]."'><h3>".$s["titre"]."</h3></a>"; 
+	}
+?>
+</body>
+</html>	
+	

@@ -1,9 +1,10 @@
 <?php
 date_default_timezone_set('Europe/Paris');
 
-define ("ROOT_PATH","C://xampp/htdocs");
+define ("ROOT_PATH","C:\wamp\www");
 define ("WEB_ROOT","http://localhost/GeText");
 define ("ROOT_PATH_SITE",ROOT_PATH."/GeText");
+define ("WEB_ROOT_AJAX",WEB_ROOT."/public");
 
 
 // Define path to application directory
