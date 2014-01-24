@@ -15,6 +15,7 @@ class PropositionsController extends Zend_Controller_Action
 	    	, array("niv"=>"Proposition Romane", "titre"=>"Ecran 5","lien"=> WEB_ROOT."/recherches%20graphiques/Color_GeText/Visuel1_4.svg")
 	    	, array("niv"=>"Proposition Romane", "titre"=>"Prototype","lien"=> WEB_ROOT_AJAX."/Propositions/romane")
 	    	, array("niv"=>"Proposition Sophie", "titre"=>"Ecran fixe","lien"=> WEB_ROOT."/recherches%20graphiques/GeText_sophie.svg")
+	    	, array("niv"=>"Proposition Sophie", "titre"=>"Test dégradé","lien"=> WEB_ROOT."/recherches%20graphiques/anim_svg_3.html")
 	    	, array("niv"=>"Proposition Sophie", "titre"=>"Prototype","lien"=> WEB_ROOT_AJAX."/Propositions/sophie")
 	    	);
     	
