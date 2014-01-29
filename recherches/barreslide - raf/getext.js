@@ -1,4 +1,9 @@
 
+window.onresize = function (e) {
+
+var widthslide = $(slide).width();
+
+}
 
 function go() {
 		// lancement des fonctions avec les paramètres correspondant
@@ -18,10 +23,12 @@ $( cursor ).draggable({ axis: "x" , containment: "parent" });
 // À chaque fois que la division est draggée
 $( cursor ).on( "drag", function( event, ui ) {
 
+var widthslide = $(slide).width();
+
 
 var posx = $(cursor).css("left"); //position en pixel :
 var posx = posx.replace('px', ''); //enlever le 'px'
-var posx = posx/20.5; // la position passe de 0->224 à 0->10
+var posx = posx*10/widthslide; // la position passe de 0->224 à 0->10
 var posx = Math.floor(posx); // on enlèvre la partie décimale
 
 
