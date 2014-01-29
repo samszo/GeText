@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>jQuery UI Draggable - Snap to element or grid</title>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+  <script src="jquery.ui.touch-punch.min.js"></script>
+
+  <script>
+$(function() {
+    $('#groupe').draggable();
+      
+    $('#target').droppable({
+        drop: function() {
+          alert( "sa race" );
+        }
+    });   
+});
+
+  </script>
+
+   
+
+</head>
+<body>
+
+  <div ID="target" style="height:400px;width:400px;background-color:#00CCFF"></div>
+
+  <div id="div1" style="height:100px;width:100px;background-color:#FFCCAA"></div>
+
+  <svg id="svg">
+    <g id="groupe">
+      <circle id="redcircle" cx="50" cy="50" r="50" fill="red" />
+    <g>
+  </svg>
+
+
+</body>
+</html>
