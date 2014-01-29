@@ -18,18 +18,37 @@ function init(){
 	var lineData = getAleaData(100, 0, 100);
 		
 	//The SVG Container
-	var svgContainer = d3.select("body").append("svg")
+	var svgContainer = d3.select("#curve").append("svg")
 	                                    .attr("width", 400)
-	                                    .attr("height", 300);
+	                                    .attr("height", 150);
+	
+	
+
+	var lineDefs = svgContainer.append("defs");
+	
+	var lineGradient = lineDefs.append("linearGradient")
+		.attr("id","MyGradient");
+	
+	var color1 = lineGradient.append("stop")
+		.attr("id","first")
+		.attr("offset","35%")
+		.attr("stop-color","#fff");
+	
+	var color2 = lineGradient.append("stop")
+		.attr("id","second")
+		.attr("offset","55%")
+		.attr("stop-color","#000");
 	
 	//The line SVG Path we draw
 	var lineGraph = svgContainer.append("path")
        .attr("class", "line")
        .attr("d", lineFunction(lineData))
-       .attr("stroke", "blue")
+       .attr("stroke", "url(#MyGradient)")
        .attr("stroke-width", 2)
-       .attr("fill", "none");
+       .attr("fill", "none");	
+	
 }
+
 function anime(){
 	var data = getAleaData(Math.floor((400)*Math.random()+1), 0, Math.floor((100)*Math.random()+1));
 	   d3.select(".line").transition()
@@ -53,10 +72,140 @@ function getAleaData(freq, minY, maxY){
 	}	
 	return data;
 }
+
+function gradient(){
+	
+		//Récupération de la valeur du input "range"
+
+		var grad = document.getElementById('out').value;
+		var grad1 = 2-grad;
+		var x = -5;
+		
+		//Couleurs 1 et 2 par défaut (blanc)
+		
+		var couleur1 = 'fff';
+		var couleur2 = 'fff';
+		
+		//Sélection de la première couleur
+		
+		if (document.getElementById('colour1').checked) {
+			couleur1 = document.getElementById('colour1').value;
+		}
+		if (document.getElementById('colour2').checked) {
+			couleur1 = document.getElementById('colour2').value;
+		}
+		if (document.getElementById('colour3').checked) {
+			couleur1 = document.getElementById('colour3').value;
+		}
+		if (document.getElementById('colour4').checked) {
+			couleur1 = document.getElementById('colour4').value;
+		}
+		if (document.getElementById('colour5').checked) {
+			couleur1 = document.getElementById('colour5').value;
+		}
+		if (document.getElementById('colour6').checked) {
+			couleur1 = document.getElementById('colour6').value;
+		}
+		
+		//Sélection de la deuxième couleur
+		
+		if (document.getElementById('colour1bis').checked) {
+			couleur2 = document.getElementById('colour1bis').value;
+		}
+		if (document.getElementById('colour2bis').checked) {
+			couleur2 = document.getElementById('colour2bis').value;
+		}
+		if (document.getElementById('colour3bis').checked) {
+			couleur2 = document.getElementById('colour3bis').value;
+		}
+		if (document.getElementById('colour4bis').checked) {
+			couleur2 = document.getElementById('colour4bis').value;
+		}
+		if (document.getElementById('colour5bis').checked) {
+			couleur2 = document.getElementById('colour5bis').value;
+		}
+		if (document.getElementById('colour6bis').checked) {
+			couleur2 = document.getElementById('colour6bis').value;
+		}
+		
+		//Dégradé d'arrière plan du input "range"
+		
+		function gradient2(){
+		
+			var grad2 = document.getElementById('out').value;
+			var grad2Neg = grad2*-1;
+		
+			var a = grad2-30;
+			var b = 30-grad2Neg;
+		
+			var test = document.getElementById('rangeContainer');
+			test.style.background="linear-gradient(90deg, #" + couleur1 + " " + a + "%, #" + couleur2 + " " + b + "%)";
+
+		}
+		
+		gradient2();
+
+		//Dégradé de la courbe
+		
+		var color1 = document.getElementById("first");
+			color1.setAttribute('offset', grad1*-1 + '%');
+			color1.setAttribute('stop-color', "#" +  couleur1);
+		var color2 = document.getElementById("second");
+			color2.setAttribute('offset', grad - x + '%');
+			color2.setAttribute('stop-color', "#" + couleur2);
+
+	};
 </script>
+<style>
+	body{
+	background:#fff;
+	}
+	#curve{
+	margin-top:30px;
+	}
+	#rangeContainer{
+	width:402px;
+	padding:0;
+	}
+	#out{
+	display:none;
+	}
+	input[type='range'] {
+		-webkit-appearance: none !important;
+		margin:0;
+		height:15px;
+		width: 400px;
+	}
+	input[type='range']::-webkit-slider-thumb {
+		-webkit-appearance: none !important;
+		background:#ececec;
+		height:15px;
+		width:5px;
+	}
+</style>
 </head>
 <body onload="init()">
-<div onclick="animeReset();" >CHANGE</div>
-
+	<div onclick="animeReset();" >Changer le tracé</div>
+	<form id="colourChoices1" name="colourChoices">
+		<input type="radio" name="colour1" id="colour1" value="FFFF00" onclick="gradient();" >
+		<input type="radio" name="colour1" id="colour2" value="F993A9" onclick="gradient();" >
+		<input type="radio" name="colour1" id="colour3" value="DD0A0A" onclick="gradient();" >
+		<input type="radio" name="colour1" id="colour4" value="E7C5EA" onclick="gradient();" >
+		<input type="radio" name="colour1" id="colour5" value="3B5A85" onclick="gradient();" >
+		<input type="radio" name="colour1" id="colour6" value="A8E5F6" onclick="gradient();" >
+	</form>
+	<form id="colourChoices2" name="colourChoices">
+		<input type="radio" name="colour2" id="colour1bis" value="FFFF00" onclick="gradient();" >
+		<input type="radio" name="colour2" id="colour2bis" value="F993A9" onclick="gradient();" >
+		<input type="radio" name="colour2" id="colour3bis" value="DD0A0A" onclick="gradient();" >
+		<input type="radio" name="colour2" id="colour4bis" value="E7C5EA" onclick="gradient();" >
+		<input type="radio" name="colour2" id="colour5bis" value="3B5A85" onclick="gradient();" >
+		<input type="radio" name="colour2" id="colour6bis" value="A8E5F6" onclick="gradient();" >
+	</form>
+	<div id="curve"></div>
+	<form id="rangeContainer" onsubmit="return false" oninput="out.value = valeur.valueAsNumber; gradient();">
+		<input type="range" min="0" max ="100" value="50" id="valeur" name="valeur">
+		<output name="out" id="out" for="valeur" >50</output>
+	</form>
 </body>
 </html>
