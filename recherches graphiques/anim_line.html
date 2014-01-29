@@ -32,10 +32,9 @@ function init(){
 }
 function anime(){
 	var data = getAleaData(Math.floor((400)*Math.random()+1), 0, Math.floor((100)*Math.random()+1));
-	   d3.selectAll(".line").transition()
+	   d3.select(".line").transition()
        .duration(3000)
-       .attr("d", lineFunction(data))
-       .attr("stroke", "red");
+       .attr("d", lineFunction(data));
 }
 function getAleaData(freq, minY, maxY){
 	var data = [];
