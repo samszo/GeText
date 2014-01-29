@@ -32,7 +32,7 @@
 	}
 	@font-face { 
 	          font-family: Quicksand-Regular; 
-	          src: url(../../public/fonts/Quicksans-Regular.otf) format("truetype");
+	          src: url(../../public/font/quicksand-regular-webfont.ttf) format("truetype");
 	     }
 	#txtGene {
 		position:absolute;
@@ -46,7 +46,10 @@
     <script type="text/javascript">
 	    var toChoix;
 	    var paramsGen;
-	    var paramsEle = [{id:'circle2095',e:null},{id:'circle2099',e:null},{id:'circle2103',e:null}];
+	    var paramsEle = [
+	         {id:'circle2097',e:null,info:'g5156', titre:"JOYEUX"}
+	    	,{id:'circle2101',e:null, info:'g5560', titre:"SENTIMENT"}
+	    	];
 	    var txtAffect;
 	    var tweet;
 		//merci à http://stackoverflow.com/questions/3163615/how-to-scroll-html-page-to-given-anchor-using-jquery-or-javascript
@@ -73,11 +76,14 @@
 	    }
 
 	    function ajoutInterParams(e){
+		    //ajoute le click sur le cercle
 	    	var cb = document.getElementById(e.id);
 	    	cb.addEventListener("click", selectParam, false);
-	    	cb.addEventListener("onmouseover", showParam, false);
-	    	cb.addEventListener("onmouseout", hideParam, false);
-	    	e.e = cb;
+	    	//masque l'info
+	    	var g = document.getElementById(e.info);
+	    	g.setAttribute("visibility","hidden");	    	
+			//concerve l'info
+	    	e.e = g;
 	    }
 	    
 	    function genTexte(){
@@ -105,8 +111,12 @@
 	    }
 	    function selectParam(evt){
 	    	var e = evt.currentTarget;
-	    	if(e.style.fill=="#000000")e.style.fill="white";
-	    	else e.style.fill="#000000"; 
+	    	//affiche l'info
+	    	paramsEle.forEach(function(d){
+		    	if(d.id==e.id)d.e.setAttribute("visibility","visible");
+		    	else d.e.setAttribute("visibility","hidden"); 
+		    	});
+	    	
 	    }
 	    function showParam(evt){
 	    	var e = evt.currentTarget;
@@ -1828,7 +1838,7 @@
        r="6.4320002"
        transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
        id="circle2097"
-       style="fill:none;stroke:#d6d6d6;stroke-width:0.25;stroke-miterlimit:10" />
+       style="fill:white;stroke:#d6d6d6;stroke-width:0.25;stroke-miterlimit:10" />
     <circle
        cx="432.49399"
        cy="296.03699"
@@ -1842,7 +1852,7 @@
        r="6.4330001"
        transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
        id="circle2101"
-       style="fill:none;stroke:#d6d6d6;stroke-width:0.25;stroke-miterlimit:10" />
+       style="fill:white;stroke:#d6d6d6;stroke-width:0.25;stroke-miterlimit:10" />
     <circle
        cx="465.707"
        cy="296.03699"
@@ -1906,7 +1916,7 @@
        transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
        id="circle2119"
        style="fill:#a9eff7" />
-    <g
+    <g visibility="hidden"
        transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
        id="g2121">
       <rect
@@ -1916,29 +1926,29 @@
          y="335.66199"
          id="rect2123"
          style="fill:none" />
-      <text
+      <text 
          transform="translate(404.1709,340.562)"
          id="text2125">
         <tspan
            x="0"
            y="0"
            id="tspan2127"
-           style="font-size:7px;fill:#e7c5ea;font-family:Quicksand-Regular">mélanco</tspan>
+           style="font-size:7px;fill:#e7c5ea;font-family:Quicksand-Regular">MELANCOLIQUE</tspan>
         <tspan
            x="35.264999"
            y="0"
            id="tspan2129"
            style="font-size:7px;fill:#e7c5ea;font-family:Quicksand-Regular">-</tspan>
       </text>
+	    <line
+	       style="fill:none;stroke:#e7c5ea;stroke-width:1.37735438;stroke-miterlimit:10"
+	       stroke-miterlimit="10"
+	       x1="97.300713"
+	       y1="780.60425"
+	       x2="97.300713"
+	       y2="798.7099"
+	       id="line2131" />
     </g>
-    <line
-       style="fill:none;stroke:#e7c5ea;stroke-width:1.37735438;stroke-miterlimit:10"
-       stroke-miterlimit="10"
-       x1="97.300713"
-       y1="780.60425"
-       x2="97.300713"
-       y2="798.7099"
-       id="line2131" />
     <rect
        width="330.1489"
        height="33.81971"
@@ -1951,7 +1961,7 @@
        y="691.70905"
        transform="scale(1.02435,0.97622887)"
        id="text4400"
-       style="font-size:20.20119667px;fill:#c4c4c4;font-family:Quicksand-Regular">DEUX éMOTIONS ?</text>
+       style="font-size:20.20119667px;fill:#c4c4c4;font-family:Quicksand-Regular">DEUX EMOTIONS ?</text>
     <g
        transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
        id="g4414">
@@ -1965,7 +1975,7 @@
       <text
          transform="translate(431.7285,365.3398)"
          id="text4418"
-         style="font-size:11px;fill:#c4c4c4;font-family:Quicksand-Regular">Intensité ?</text>
+         style="font-size:11px;fill:#c4c4c4;font-family:Quicksand-Regular">INTENSITE ?</text>
     </g>
     <line
        style="fill:#f4f4f4;stroke:#b5b4b5;stroke-width:0.4591181;stroke-miterlimit:10"
@@ -2131,14 +2141,6 @@
         </g>
       </g>
     </g>
-    <line
-       style="fill:none;stroke:#f9f569;stroke-width:1.37735438;stroke-miterlimit:10"
-       stroke-miterlimit="10"
-       x1="97.296921"
-       y1="709.16589"
-       x2="97.296921"
-       y2="727.27155"
-       id="line5154" />
     <g
        transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
        id="g5156">
@@ -2148,12 +2150,21 @@
          x="417.09399"
          y="276"
          id="rect5158"
-         style="fill:none" />
+         style="fill:none"
+         visibility="inherit" />
       <text
          transform="translate(417.0938,280.8999)"
-         id="text5160"
-         style="font-size:7px;fill:#f9f569;font-family:Quicksand-Regular">Joyeux</text>
+         id="text5160" visibility="inherit"
+         style="font-size:7px;fill:#f9f569;font-family:Quicksand-Regular">JOYEUX</text>
     </g>
+	    <line visibility="inherit"
+	       style="fill:none;stroke:#f9f569;stroke-width:1.37735438;stroke-miterlimit:10"
+	       stroke-miterlimit="10"
+	       x1="97.296921"
+	       y1="709.16589"
+	       x2="97.296921"
+	       y2="727.27155"
+	       id="line5154" />
     <g
        transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
        id="g5441">
@@ -2246,6 +2257,14 @@
          id="rect5474"
          style="fill:#a9eff7" />
     </g>
+    <g
+       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
+       id="g5560">
+      <text
+         transform="translate(441.0156,280.8999)"
+         id="text5564"
+         style="font-size:7px;fill:#fcb4ce;font-family:Quicksand-Regular">SENTIMENTAL</text>
+    </g>
     <line
        style="fill:none;stroke:#fcb4ce;stroke-width:1.37735438;stroke-miterlimit:10"
        stroke-miterlimit="10"
@@ -2254,29 +2273,6 @@
        x2="159.85402"
        y2="727.61395"
        id="line5558" />
-    <g
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="g5560">
-      <rect
-         width="49.672001"
-         height="4.9879999"
-         x="441.01599"
-         y="276"
-         id="rect5562"
-         style="fill:none" />
-      <text
-         transform="translate(441.0156,280.8999)"
-         id="text5564"
-         style="font-size:7px;fill:#fcb4ce;font-family:Quicksand-Regular">sentimental</text>
-    </g>
-    <line
-       style="fill:none;stroke:#f8533d;stroke-width:1.37735438;stroke-miterlimit:10"
-       stroke-miterlimit="10"
-       x1="222.02931"
-       y1="709.16589"
-       x2="222.02931"
-       y2="727.61395"
-       id="line5566" />
     <g
        transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
        id="g5568">
@@ -2290,7 +2286,15 @@
       <text
          transform="translate(477.9463,280.8999)"
          id="text5572"
-         style="font-size:7px;fill:#f8533d;font-family:Quicksand-Regular">colérique</text>
+         style="font-size:7px;fill:#f8533d;font-family:Quicksand-Regular">COLERIQUE</text>
+    <line
+       style="fill:none;stroke:#f8533d;stroke-width:1.37735438;stroke-miterlimit:10"
+       stroke-miterlimit="10"
+       x1="222.02931"
+       y1="709.16589"
+       x2="222.02931"
+       y2="727.61395"
+       id="line5566" />
     </g>
     <g
        transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
