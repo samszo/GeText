@@ -47,6 +47,7 @@
 	    var paramsGen;
 	    var paramsEle = [{id:'circle2095',e:null},{id:'circle2099',e:null},{id:'circle2103',e:null}];
 	    var txtAffect;
+	    var tweet;
 		//merci à http://stackoverflow.com/questions/3163615/how-to-scroll-html-page-to-given-anchor-using-jquery-or-javascript
     	function scrollTo(hash) {
 	        location.hash = "#" + hash;
@@ -56,8 +57,10 @@
 			//attend 3 seconde avant d'afficher la suite
 	    	toChoix=setInterval(function(){scrollTo("choix")},3000);
 	    	//ajoute les événements aux boutons
-	    	var btn2 = document.getElementById("circle5062"); 
-	    	btn2.addEventListener("click", genTexte, false); 
+	    	var btnGen = document.getElementById("circle5062"); 
+	    	btnGen.addEventListener("click", genTexte, false); 
+	    	var btnSave = document.getElementById("circle5062"); 
+	    	btnSave.addEventListener("click", saveTexte, false); 
 	    	//ajoute les événements aux cases à cocher
 	    	
 	    	paramsEle.forEach(ajoutInterParams);
@@ -84,6 +87,18 @@
 			    	scrollTo("texte");
 			    });
 	    }
+	    function saveTexte(){
+			$.post("../api/savetext"
+				, getParamsSave(),
+				 function(data){
+					if(data)alert(data);
+				 });
+	    }
+
+	    function getParamSave(){
+			var p = {"texte":$('#txtGene').html};
+	    	return p;	    	 
+	    }
 	    function getParamGen(){
 	    	var Ecb1 = document.getElementById("cb1");
 	    	 
@@ -103,6 +118,11 @@
 	    	if(e.style.fill=="#000000")e.style.fill="white";
 	    	else e.style.fill="#000000"; 
 	    }
+		function envoiTweet() {
+		   	window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweet),
+		       '',
+		       'status=no, scrollbars=no, menubar=no');
+		}
 	    
 	</script>
   </head>
