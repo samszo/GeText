@@ -36,6 +36,13 @@ function anime(){
        .duration(3000)
        .attr("d", lineFunction(data));
 }
+function animeReset(){
+	d3.select(".line").transition()
+       .duration(3000)
+       .attr("d", lineFunction([{"x":0, "y":0},{"x":400, "y":0}]))
+       .each("end", anime);
+}
+
 function getAleaData(freq, minY, maxY){
 	var data = [];
 	var pas = 400/freq;
@@ -49,7 +56,7 @@ function getAleaData(freq, minY, maxY){
 </script>
 </head>
 <body onload="init()">
-<div onclick="anime();" >CHANGE</div>
+<div onclick="animeReset();" >CHANGE</div>
 
 </body>
 </html>
