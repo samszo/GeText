@@ -61,8 +61,10 @@
 	    	btnGen.addEventListener("click", genTexte, false); 
 	    	var btnSave = document.getElementById("circle5062"); 
 	    	btnSave.addEventListener("click", saveTexte, false); 
+	    	var btnTweet = document.getElementById("circle5062"); 
+	    	btnSave.addEventListener("click", envoiTweet, false); 
+
 	    	//ajoute les événements aux cases à cocher
-	    	
 	    	paramsEle.forEach(ajoutInterParams);
 
 	    	//récupère les éléments
@@ -78,10 +80,8 @@
 	    }
 	    
 	    function genTexte(){
-		    if(!paramsGen){
-			    getParamGen();
-		    }
-		    $.getJSON('../api/gettext', {'json':1}, 
+			var p = getParamGen();
+		    $.getJSON('../api/gettext', p, 
 				function(fragment){
 			    	$('#txtGene').html(fragment.texte);
 			    	scrollTo("texte");
@@ -96,12 +96,11 @@
 	    }
 
 	    function getParamSave(){
-			var p = {"texte":$('#txtGene').html};
+			var p = {"texte":$('#txtGene').html,"params":getParamGen()};
 	    	return p;	    	 
 	    }
 	    function getParamGen(){
-	    	var Ecb1 = document.getElementById("cb1");
-	    	 
+	    	return {'json':1,'pro':'propositions/sophie'}; 
 	    }
 	    function selectParam(evt){
 	    	var e = evt.currentTarget;
@@ -119,6 +118,9 @@
 	    	else e.style.fill="#000000"; 
 	    }
 		function envoiTweet() {
+			var poeme = $('#txtGene').text();
+			poeme = poeme
+			var tweet = "#GeText "+
 		   	window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweet),
 		       '',
 		       'status=no, scrollbars=no, menubar=no');

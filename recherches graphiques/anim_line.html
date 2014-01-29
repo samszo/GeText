@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../public/js/d3.v3.js" ></script>
+
+<script type="text/javascript">
+
+//This is the accessor function we talked about above
+var lineFunction = d3.svg.line()
+                         .x(function(d) { return d.x; })
+                         .y(function(d) { return d.y; })
+                         .interpolate("basis");
+
+function init(){
+	//The data for our line
+	var lineData = getAleaData(100, 0, 100);
+		
+	//The SVG Container
+	var svgContainer = d3.select("body").append("svg")
+	                                    .attr("width", 400)
+	                                    .attr("height", 300);
+	
+	//The line SVG Path we draw
+	var lineGraph = svgContainer.append("path")
+       .attr("class", "line")
+       .attr("d", lineFunction(lineData))
+       .attr("stroke", "blue")
+       .attr("stroke-width", 2)
+       .attr("fill", "none");
+}
+function anime(){
+	var data = getAleaData(Math.floor((400)*Math.random()+1), 0, Math.floor((100)*Math.random()+1));
+	   d3.selectAll(".line").transition()
+       .duration(3000)
+       .attr("d", lineFunction(data))
+       .attr("stroke", "red");
+}
+function getAleaData(freq, minY, maxY){
+	var data = [];
+	var pas = 400/freq;
+	for (var i=0;i<freq;i++)
+	{ 
+		var y =  Math.floor((maxY-minY)*Math.random())+minY; 
+		data.push({ "x": pas*i,   "y": y});
+	}	
+	return data;
+}
+</script>
+</head>
+<body onload="init()">
+<div onclick="anime();" >CHANGE</div>
+
+</body>
+</html>

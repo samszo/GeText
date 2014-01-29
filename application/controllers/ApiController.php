@@ -26,7 +26,8 @@ class ApiController extends Zend_Controller_Action
     {
     	if ($this->_getParam('texte', 0)){
     		$dbP = new Model_DbTable_Gt_poemes();
-    		$this->view->idP = $dbP->ajouter(array("texte"=>$this->_getParam('texte')));	
+    		$this->view->idP = $dbP->ajouter(array("texte"=>$this->_getParam('texte'),"params"=>$this->_getParam('params')));
+    		$this->view->url = WEB_ROOT_AJAX.$this->_getParam('pro')."?id=".$this->view->idP;	
     	}else{
     		$this->view->idP = false;
     	}
