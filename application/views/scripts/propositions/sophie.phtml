@@ -1,9 +1,10 @@
-<!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title>GeText</title>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <script type="text/javascript" src="../../public/js/jquery-1.9.1.js" ></script>
+    <script type="text/javascript" src="../../public/js/queue.v1.min.js" ></script>
+    <script type="text/javascript" src="../../public/js/d3.v3.js" ></script>
 	<style type="text/css">
 	html {
 	    height: 100%;
@@ -46,52 +47,413 @@
  	   background: -webkit-gradient(linear, left top, left bottom, from(#000), to(#045FB4));
     	-webkit-background-clip: text;
     	-webkit-text-fill-color: transparent;
-<				
-		}	
+				
+		}
+		
+	#rangeContainer{
+		width:160px;
+		position:absolute;
+		margin-top:350px;
+		margin-left:74px;
+		padding:0;
+	}
+	#out{
+		display:none;
+	}
+	input[type='range'] {
+		-webkit-appearance: none !important;
+		margin:0;
+		height:15px;
+		width: 160px;
+	}
+	input[type='range']::-webkit-slider-thumb {
+		-webkit-appearance: none !important;
+		background:#ececec;
+		height:15px;
+		width:5px;
+	}			
 	</style>
     <script type="text/javascript">
-	    var toChoix;
+		var urlPoeme = "<?php echo WEB_ROOT_AJAX; ?>";	
+		var idPoeme = 0;
+    	var toChoix;
 	    var paramsGen;
 	    var paramsEle = [
-	         {id:'circle2097',e:null,info:'g5156', titre:"JOYEUX"}
-	    	,{id:'circle2101',e:null, info:'g5560', titre:"SENTIMENT"}
+	         {titre:"JOYEUX", idBtn:'circle2097',eInfo:null ,eSlt:null, info:'g5156', slt:'g4410', btnG:'path4346', lienG:'pJoyeuxG', btnD:'path4408', lienD:'pJoyeuxD', couleur:"#f9f569"}
+	    	,{titre:"SENTIMENT", idBtn:'circle2101',eInfo:null ,eSlt:null, info:'g5560', slt:'g4410', lien:'pJoyeuxG', lienD:'pJoyeuxD'}
+	    	,{titre:"COLERIQUE", idBtn:'circle2105',eInfo:null ,eSlt:null, info:'g5568', slt:'g4579',  btnG:'path4564', lienG:'path4560', btnD:'path4568', lienD:'path4566', couleur:"#f8533d"}
+	    	
 	    	];
-	    var txtAffect;
+	    var txtAffect, txtD, txtG, slt, marker, markerOld;
 	    var tweet;
+
+	    var lineAffect = [{nom:"joyeux", interpolate:"basis", freq:"10", minY:0, maxY:30, couleur:"#FFFF00"}
+	        ,{nom:"colérique", interpolate:"linear", freq:"100", minY:0, maxY:40, couleur:"#F993A9"}
+	        ,{nom:"calme", interpolate:"basis", freq:"3", minY:-2, maxY:2, couleur:"#DD0A0A"}
+	        ,{nom:"froid", interpolate:"basis", freq:"6", minY:0, maxY:20, couleur:"#E7C5EA"}
+	        ,{nom:"sentimental", interpolate:"basis", freq:"50", minY:0, maxY:40, couleur:"#3B5A85"}
+	        ,{nom:"mélancolique", interpolate:"bundle", freq:"10", minY:0, maxY:20, couleur:"#A8E5F6"}
+        ];
+		var sltAfct = "basis";
+		//fonction qui transforme un tableau de données en ligne
+		var large = 400, haut = 150;
+		var lineFunction = d3.svg.line()
+			.x(function(d) { return d.x; })
+			.y(function(d) { return d.y; })
+			.interpolate(sltAfct);
+
+	    
 		//merci à http://stackoverflow.com/questions/3163615/how-to-scroll-html-page-to-given-anchor-using-jquery-or-javascript
     	function scrollTo(hash) {
 	        location.hash = "#" + hash;
 	        clearInterval(toChoix);
 	    }
+
+	    //charge le premier svg
+	    //merci à http://bl.ocks.org/KoGor/8162640
+	    function charge(){
+	    	queue()
+	    		.defer(d3.xml, "../../recherches%20graphiques/nvl_version_getext_sophie/SVG/page2.svg", "image/svg+xml")
+	    		.await(charge1);
+	    }
+	    function charge1(error, xml){
+	    	//Adding our svg file to HTML document
+			var importedNode = document.importNode(xml.documentElement, true);
+    	  	d3.select("#contSvg1").node().appendChild(importedNode);
+
+    	  	//ajoute la définition des dégradés
+	    	var svg = d3.select("#svgChoix");
+			var lineDefs = svg.append("defs");	
+			var lineGradient = lineDefs.append("linearGradient")
+				.attr("id","MyGradient");
+			var color1 = lineGradient.append("stop")
+				.attr("id","first")
+				.attr("offset","35%")
+				.attr("stop-color","#fff");
+			var color2 = lineGradient.append("stop")
+				.attr("id","second")
+				.attr("offset","55%")
+				.attr("stop-color","#000");
+    	  	
+	    	//The data for our line
+	    	var afct = lineAffect[2];
+	    	var lineData = getAleaData(afct.freq, afct.minY, afct.maxY);
+	    	//The line SVG Path we draw
+	    	var lineGraph = svg.append("path")
+	           .attr("class", "line")
+	           .attr("d", lineFunction(lineData))
+	           .attr("stroke", "url(#MyGradient)")
+	           .attr("stroke-width", 2)
+	           .attr("fill", "none");
+	               	  	
+			/*charge le deuxième svg
+	    	queue()
+    			.defer(d3.xml, "wiggle.svg", "image/svg+xml")
+    			.await(charge2);
+    	  	*/
+    	  	init();
+	    }
+	    
 	    function init(){
-			//attend 3 seconde avant d'afficher la suite
+		    
+			//attend 3 secondes avant d'afficher la suite
 	    	toChoix=setInterval(function(){scrollTo("choix")},3000);
+
 	    	//ajoute les événements aux boutons
 	    	var btnGen = document.getElementById("circle5064"); 
-	    	btnGen.addEventListener("click", genTexte, false); 
+	    	btnGen.addEventListener("click", genTexte, false);
+	    	/* 
 	    	var btnSave = document.getElementById("circle5062"); 
 	    	btnSave.addEventListener("click", saveTexte, false); 
+			*/
 	    	var btnTweet = document.getElementById("path5542"); 
 	    	btnTweet.addEventListener("click", envoiTweet, false); 
 
-	    	//ajoute les événements aux cases à cocher
+	    	//ajoute les événements aux paramètres
 	    	paramsEle.forEach(ajoutInterParams);
 
-	    	//récupère les éléments
-	    	txtAffect = document.getElementById("tspan3183");	    	 
+	    	//récupère les textes de sélection
+	    	txtD = d3.select("#txtDroite");	    	 
+	    	txtG = d3.select("#txtGauche");	    	 
+
+	    	
 	    }
 
-	    function ajoutInterParams(e){
+	    function ajoutInterParams(e, i){
 		    //ajoute le click sur le cercle
-	    	var cb = document.getElementById(e.id);
-	    	cb.addEventListener("click", selectParam, false);
-	    	//masque l'info
+	    	var cb = document.getElementById(e.idBtn);
+	    	cb.addEventListener("click", showParam, false);
+			//ajoute l'attribut idParam pour récupérer directement les données liées
+    		cb.setAttribute("idParam", i);
+		    //ajoute le click sur le btnG
+	    	var bG = document.getElementById(e.btnG);
+	    	if(bG){
+		    	bG.addEventListener("click", animeSelect, false);
+				//ajoute l'attribut idParam pour récupérer directement les données liées
+	    		bG.setAttribute("idParam", i);
+	    	}
+		    //ajoute le click sur le btnD
+	    	var bD = document.getElementById(e.btnD);
+	    	if(bD){
+		    	bD.addEventListener("click", animeSelect, false);
+				//ajoute l'attribut idParam pour récupérer directement les données liées
+	    		bD.setAttribute("idParam", i);
+	    	}
+			//masque l'info
 	    	var g = document.getElementById(e.info);
 	    	g.setAttribute("visibility","hidden");	    	
-			//concerve l'info
-	    	e.e = g;
+			//conserve l'élément d'information 
+	    	e.eInfo = g;
+			//conserve l'élément de selection 
+	    	e.eSlt = document.getElementById(e.slt);
 	    }
-	    
+	    function showParam(evt){
+		    //récupère le paramètre de donnée
+	    	var e = evt.currentTarget;
+	    	var idP = e.getAttribute("idParam");
+	    	//affiche ou masque les boutons suivant la sélection
+	    	//		    	if(i==idP && (txtG.innerHTML==paramsEle[i].titre || txtG.innerHTML==paramsEle[i].titre)){
+	    	paramsEle.forEach(function(d, i){
+		    	if(i==idP){
+			    	paramsEle[i].eInfo.setAttribute("visibility","visible");	    		    	
+		    	}else{
+			    	paramsEle[i].eInfo.setAttribute("visibility","hidden");	    		    	
+		    	}			    	
+	    	});	    	
+	    }
+	    function selectParam(evt){
+	    	var e = evt.currentTarget;
+	    	animeSelect();
+	    	//affiche ou masque les boutons
+	    	paramsEle.forEach(function(d, i){
+		    	if(d.idBtn==e.id){
+			    	//vérifie la sélection
+			    	if(!txtG.getAttribute("idParam")){
+			    		txtG.innerHTML=d.titre;
+			    		txtG.setAttribute("idParam",i);
+			    		slt = "G";
+				    }else if(!txtD.getAttribute("idParam")){
+			    		txtD.innerHTML=d.titre;
+			    		txtD.setAttribute("idParam",i);
+			    		slt = "D";
+			    	}else{
+				    	//on affiche alternativement le bouton qui était sélectionné
+				    	//à droite ou à gauche
+				    	if(slt == "G"){
+							//on sélectionne le texte droit
+					    	var idP = txtD.getAttribute("idParam");
+					    	paramsEle[idP].e.setAttribute("visibility","visible");
+				    		txtD.innerHTML=d.titre;
+				    		txtD.setAttribute("idParam",i);
+				    		slt = "D";
+				    	}else{
+							//on sélectionne le texte gauche
+					    	var idP = txtG.getAttribute("idParam");
+					    	paramsEle[idP].e.setAttribute("visibility","visible");
+				    		txtG.innerHTML=d.titre;
+				    		txtG.setAttribute("idParam",i);
+				    		slt = "G";
+				    	}
+			    	}
+			    	//on masque le bouton qu'on vient de cliquer
+			    	d.e.setAttribute("visibility","hidden");
+		    	}
+		    	});
+	    	
+	    }
+
+	    function animeSelect(evt){
+
+			//récupère le paramètre de donnée
+		    var e = evt.currentTarget;
+			var idP = e.getAttribute("idParam");
+			txtG.innerHTML="";
+			
+			//récupère le chemin d'animation
+	    	var svg = d3.select("#svgChoix");
+	    	var path, dir;
+	    	if(paramsEle[idP].btnG==e.id){
+		    	path = svg.select("#"+paramsEle[idP].lienG);
+		    	dir = "G";
+	    	}else{
+		    	path = svg.select("#"+paramsEle[idP].lienD);
+		    	dir = "D";
+	    	}
+			//récupère le point de départ
+	    	var startPoint = pathStartPoint(path);
+	    	//affiche la sélection du marker s'il existe déjà pour cette direction
+	    	if(marker && marker.attr("dir")==dir){
+	    		markerOld = marker;
+	    	}
+	    	
+			//construction du marker
+			marker = svg.append("circle");
+	    	marker.attr("r", 6)
+	    	    .attr("idParam", idP)
+	    	    .attr("dir", dir)
+	    	    .attr("style", "fill:"+paramsEle[idP].couleur)
+	    	    .attr("transform", "translate(" + startPoint + ")");
+			//effectue la transition sur le chemin
+	    	transitionMarker(path);
+	    }	    
+
+  	  	//Get path start point for placing marker
+		function pathStartPoint(path) {
+  	    	var d = path.attr("d"),
+  	    	dsplitted = d.split(" ");
+  	    	return dsplitted[1].split(",");
+  	  	}
+
+  	  	function transitionMarker(path) {
+  	    	marker.transition()
+  	        	.duration(6000)
+  	        	.attrTween("transform", translateAlong(path.node()))
+  	        	.each("end", endSelect);// infinite loop
+  	  	}
+  	  	function translateAlong(path) {
+  	    	var l = path.getTotalLength();
+      		return function(i) {
+        		return function(t) {
+	          		var p = path.getPointAtLength(t * l);
+    	      		return "translate(" + p.x + "," + p.y + ")";//Move marker
+        		}
+      		}
+  	  	}	    	
+	    function endSelect(){
+		    //récupère le paramètre de donnée
+	    	var idP = marker.attr("idParam");
+	    	//masque les boutons de selection
+			paramsEle[idP].eSlt.setAttribute("visibility","hidden");	    		    	
+			paramsEle[idP].eInfo.setAttribute("visibility","hidden");
+			if(marker.attr("dir")=="G"){
+				txtG.text(paramsEle[idP].titre)
+					.attr("idParam",idP)
+	    	    	.style("fill", paramsEle[idP].couleur)
+				;
+			}else{
+				txtD.text(paramsEle[idP].titre)
+					.attr("idParam",idP)
+					.style("fill",paramsEle[idP].couleur)
+				;
+			}
+			//affiche la sélection du marker préédent s'il existe
+			if(markerOld){
+				paramsEle[markerOld.attr("idParam")].eSlt.setAttribute("visibility","visible");
+				//supprime le vieux marker
+				markerOld.remove();	    		    	
+			}	    		    	
+	    }
+
+	    function gradient(){
+	    	
+			//Récupération de la valeur du input "range"
+
+			var grad = document.getElementById('out').value;
+			var grad1 = 2-grad;
+			var x = -5;
+			
+			//Couleurs 1 et 2 par défaut (blanc)
+			var couleur1 = 'fff';
+			var couleur2 = 'fff';
+			
+			//récupère les couleurs
+			if(txtG.attr("idParam")){
+				couleur1 = paramsEle[txtG.attr("idParam")].couleur;
+			}
+			if(txtD.attr("idParam")){
+				couleur2 = paramsEle[txtD.attr("idParam")].couleur;
+			}
+			
+			gradientFond(couleur1, couleur2);
+
+			//Dégradé de la courbe
+			var color1 = document.getElementById("first");
+				color1.setAttribute('offset', grad1*-1 + '%');
+				color1.setAttribute('stop-color', "#" +  couleur1);
+			var color2 = document.getElementById("second");
+				color2.setAttribute('offset', grad - x + '%');
+				color2.setAttribute('stop-color', "#" + couleur2);
+
+		};
+			    
+		//Dégradé d'arrière plan du input "range"		
+		function gradientFond(couleur1, couleur2){
+		
+			var grad2 = document.getElementById('out').value;
+			var grad2Neg = grad2*-1;
+		
+			var a = grad2-30;
+			var b = 30-grad2Neg;
+		
+			var test = document.getElementById('rangeContainer');
+			test.style.background="linear-gradient(90deg, #" + couleur1 + " " + a + "%, #" + couleur2 + " " + b + "%)";
+		}
+		    
+		function transitionPath(path, d0, d1) {
+			  path.transition()
+			      .duration(2000)
+			      .attrTween("d", pathTween(d1, 4));
+			      //.each("end", function() { d3.select(this).call(transition, d1, d0); });
+			}
+
+		function pathTween(d1, precision) {
+		  return function() {
+		    var path0 = this,
+		        path1 = path0.cloneNode(),
+		        n0 = path0.getTotalLength(),
+		        n1 = (path1.setAttribute("d", d1), path1).getTotalLength();
+
+		    // Uniform sampling of distance based on specified precision.
+		    var distances = [0], i = 0, dt = precision / Math.max(n0, n1);
+		    while ((i += dt) < 1) distances.push(i);
+		    distances.push(1);
+
+		    // Compute point-interpolators at each distance.
+		    var points = distances.map(function(t) {
+		      var p0 = path0.getPointAtLength(t * n0),
+		          p1 = path1.getPointAtLength(t * n1);
+		      return d3.interpolate([p0.x, p0.y], [p1.x, p1.y]);
+		    });
+
+		    return function(t) {
+		      return t < 1 ? "M" + points.map(function(p) { return p(t); }).join("L") : d1;
+		    };
+		  };
+		}
+
+		function anime(){
+			//récupère les paramètre de l'affection
+			var afct = lineAffect[Math.floor((5)*Math.random())];
+			d3.select("#afct").text(afct.nom);
+			//précise l'interpolation sélectionnée
+			sltAfct = afct.interpolate;
+			//calcule les données de la ligne
+			var data = getAleaData(afct.freq, afct.minY, afct.maxY);
+			//calcule les coordonnées de la ligne avec les paramètre de l'affection
+			var d1 = lineFunction(data);
+			//récupère les coordonnés de la ligne initiale
+			var path = d3.select(".line");
+			var d0 = path.attr("d");
+			//affiche la transition entre les deux lignes
+			transitionPath(path, d0, d1);
+		}
+		function animeReset(){
+			d3.select(".line").transition()
+		       .duration(3000)
+		       .attr("d", lineFunction([{"x":0, "y":0},{"x":400, "y":0}]))
+		       .each("end", anime);
+		}
+
+		function getAleaData(freq, minY, maxY){
+			var data = [];
+			var pas = large/freq;
+			for (var i=0;i<freq;i++)
+			{ 
+				var y =  Math.floor((maxY-minY)*Math.random())+minY; 
+				data.push({ "x": pas*i,   "y": y});
+			}	
+			return data;
+		}	    
 	    function genTexte(){
 			var p = getParamGen();
 		    $.getJSON('../api/gettext', p, 
@@ -104,7 +466,7 @@
 			$.post("../api/savetext"
 				, getParamsSave(),
 				 function(data){
-					if(data)alert(data);
+					idPoeme=data;
 				 });
 	    }
 
@@ -115,37 +477,23 @@
 	    function getParamGen(){
 	    	return {'json':1,'pro':'propositions/sophie'}; 
 	    }
-	    function selectParam(evt){
-	    	var e = evt.currentTarget;
-	    	//affiche l'info
-	    	paramsEle.forEach(function(d){
-		    	if(d.id==e.id)d.e.setAttribute("visibility","visible");
-		    	else d.e.setAttribute("visibility","hidden"); 
-		    	});
-	    	
-	    }
-	    function showParam(evt){
-	    	var e = evt.currentTarget;
-	    	if(e.style.fill=="#000000")e.style.fill="white";
-	    	else e.style.fill="#000000"; 
-	    }
-	    function hideParam(evt){
-	    	var e = evt.currentTarget;
-	    	if(e.style.fill=="#000000")e.style.fill="white";
-	    	else e.style.fill="#000000"; 
-	    }
 		function envoiTweet() {
-			var poeme = $('#txtGene').text();
-			poeme = poeme.substr(0,100)+"... ";
-			var tweet = "#GeText "+poeme;
-		   	window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweet),
-		       '',
-		       'status=no, scrollbars=no, menubar=no');
+			$.post("../api/savetext"
+			, getParamsSave(),
+			 function(data){
+				idPoeme=data;
+				var poeme = $('#txtGene').text();
+				poeme = poeme.substr(0,100)+"... ";
+				var tweet = "#GeText "+poeme+urlPoeme+"?id="+idPoeme;
+			   	window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweet),
+			       '',
+			       'status=no, scrollbars=no, menubar=no');				
+			 });			
 		}
 	    
 	</script>
   </head>
-  <body onload="init()">
+  <body onload="charge()">
 	<table id="accueil" class="page-table"><tr><td class="page-td">
 	    <div id="global" style="background-color:black;">
 			<div style="text-align:center;" onclick="scrollTo('choix')">
@@ -1720,636 +2068,13 @@
 	</td></tr></table>
 	<table id="choix" class="page-table"><tr><td class="page-td">
 	    <div class="global" style="background-color:black;">
-			<div style="text-align:center;">
-<svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   version="1.1"
-   width="336"
-   height="476"
-   id="svg8703">
-  <defs
-     id="defs8705">
-    <linearGradient
-       x1="523.50677"
-       y1="223.15041"
-       x2="547.51947"
-       y2="223.15041"
-       id="SVGID_323_"
-       gradientUnits="userSpaceOnUse">
-      <stop
-         id="stop5448"
-         style="stop-color:#a9eff7;stop-opacity:1"
-         offset="0.29949999" />
-      <stop
-         id="stop5450"
-         style="stop-color:#fcb4ce;stop-opacity:1"
-         offset="0.89999998" />
-    </linearGradient>
-    <linearGradient
-       x1="523.50677"
-       y1="223.15041"
-       x2="547.51947"
-       y2="223.15041"
-       id="SVGID_324_"
-       gradientUnits="userSpaceOnUse">
-      <stop
-         id="stop5455"
-         style="stop-color:#a9eff7;stop-opacity:1"
-         offset="0.29949999" />
-      <stop
-         id="stop5457"
-         style="stop-color:#fcb4ce;stop-opacity:1"
-         offset="0.89999998" />
-    </linearGradient>
-    <linearGradient
-       x1="537"
-       y1="224"
-       x2="544"
-       y2="224"
-       id="SVGID_325_"
-       gradientUnits="userSpaceOnUse">
-      <stop
-         id="stop5462"
-         style="stop-color:#cad8e7;stop-opacity:1"
-         offset="0" />
-      <stop
-         id="stop5464"
-         style="stop-color:#ced5e5;stop-opacity:1"
-         offset="0.2449" />
-      <stop
-         id="stop5466"
-         style="stop-color:#dccbde;stop-opacity:1"
-         offset="0.51340002" />
-      <stop
-         id="stop5468"
-         style="stop-color:#f1bcd3;stop-opacity:1"
-         offset="0.792" />
-      <stop
-         id="stop5470"
-         style="stop-color:#fcb4ce;stop-opacity:1"
-         offset="0.89999998" />
-    </linearGradient>
-  </defs>
-  <metadata
-     id="metadata8708">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <g
-     transform="translate(0,-576.36218)"
-     id="layer1">
-    <rect
-       width="331.08951"
-       height="475.09662"
-       x="4.1893392"
-       y="579.08978"
-       id="rect2079"
-       style="fill:#ffffff" />
-    <path
-       d="m 261.064,933.99952 c 0,5.62048 -4.77634,10.17962 -10.67387,10.17962 H 66.507531 c -5.897533,0 -10.677638,-4.55914 -10.677638,-10.17962 l 0,0 c 0,-5.62048 4.780105,-10.17603 10.677638,-10.17603 H 250.39013 c 5.89753,0 10.67387,4.55555 10.67387,10.17603 l 0,0 z"
-       id="path2089"
-       style="fill:#f4f4f4;stroke:#d6d6d6;stroke-width:0.4591181;stroke-miterlimit:10" />
-    <path
-       d="m 77.777742,934.28279 c 0,5.77825 -4.909907,10.45929 -10.976746,10.45929 -6.055552,0 -10.971103,-4.68104 -10.971103,-10.45929 0,-5.77467 4.915551,-10.4593 10.971103,-10.4593 6.066839,0 10.976746,4.68463 10.976746,10.4593 z"
-       id="path2091"
-       style="fill:#ffffff;stroke:#d6d6d6;stroke-width:0.4591181;stroke-miterlimit:10" />
-    <circle
-       cx="513.71698"
-       cy="409.12"
-       r="5.8319998"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="circle2093"
-       style="fill:#ffffff;stroke:#d6d6d6;stroke-width:0.25;stroke-miterlimit:10" />
-    <rect
-       width="3.1641624"
-       height="30.904589"
-       x="155.9995"
-       y="919.11371"
-       id="rect2095"
-       style="fill:#ffffff;stroke:#d6d6d6;stroke-width:0.4591181;stroke-miterlimit:10" />
-    <circle
-       cx="432.496"
-       cy="296.03699"
-       r="6.4320002"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="circle2097"
-       style="fill:white;stroke:#d6d6d6;stroke-width:0.25;stroke-miterlimit:10" />
-    <circle
-       cx="432.49399"
-       cy="296.03699"
-       r="2.434"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="circle2099"
-       style="fill:#f9f569" />
-    <circle
-       cx="465.70599"
-       cy="296.03699"
-       r="6.4330001"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="circle2101"
-       style="fill:white;stroke:#d6d6d6;stroke-width:0.25;stroke-miterlimit:10" />
-    <circle
-       cx="465.707"
-       cy="296.03699"
-       r="2.4330001"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="circle2103"
-       style="fill:#fcb4ce" />
-    <circle
-       cx="498.79901"
-       cy="296.03699"
-       r="6.4320002"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="circle2105"
-       style="fill:none;stroke:#d6d6d6;stroke-width:0.25;stroke-miterlimit:10" />
-    <circle
-       cx="498.79901"
-       cy="296.03699"
-       r="2.434"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="circle2107"
-       style="fill:#f8533d" />
-    <circle
-       cx="432.496"
-       cy="321.759"
-       r="6.4320002"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="circle2109"
-       style="fill:none;stroke:#d6d6d6;stroke-width:0.25;stroke-miterlimit:10" />
-    <circle
-       cx="432.49399"
-       cy="321.759"
-       r="2.434"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="circle2111"
-       style="fill:#e7c5ea" />
-    <circle
-       cx="465.70599"
-       cy="321.759"
-       r="6.4330001"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="circle2113"
-       style="fill:none;stroke:#d6d6d6;stroke-width:0.25;stroke-miterlimit:10" />
-    <circle
-       cx="465.707"
-       cy="321.759"
-       r="2.4330001"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="circle2115"
-       style="fill:#e6e8e8" />
-    <circle
-       cx="498.79901"
-       cy="321.759"
-       r="6.4320002"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="circle2117"
-       style="fill:none;stroke:#d6d6d6;stroke-width:0.25;stroke-miterlimit:10" />
-    <circle
-       cx="498.79901"
-       cy="321.759"
-       r="2.434"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="circle2119"
-       style="fill:#a9eff7" />
-    <g visibility="hidden"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="g2121">
-      <rect
-         width="56.648998"
-         height="4.9879999"
-         x="404.17099"
-         y="335.66199"
-         id="rect2123"
-         style="fill:none" />
-      <text 
-         transform="translate(404.1709,340.562)"
-         id="text2125">
-        <tspan
-           x="0"
-           y="0"
-           id="tspan2127"
-           style="font-size:7px;fill:#e7c5ea;font-family:Quicksand-Regular">MELANCOLIQUE</tspan>
-        <tspan
-           x="35.264999"
-           y="0"
-           id="tspan2129"
-           style="font-size:7px;fill:#e7c5ea;font-family:Quicksand-Regular">-</tspan>
-      </text>
-	    <line
-	       style="fill:none;stroke:#e7c5ea;stroke-width:1.37735438;stroke-miterlimit:10"
-	       stroke-miterlimit="10"
-	       x1="97.300713"
-	       y1="780.60425"
-	       x2="97.300713"
-	       y2="798.7099"
-	       id="line2131" />
-    </g>
-    <rect
-       width="330.1489"
-       height="33.81971"
-       x="-5.2166133"
-       y="661.46075"
-       id="rect4398"
-       style="fill:none" />
-    <text
-       x="60.001698"
-       y="691.70905"
-       transform="scale(1.02435,0.97622887)"
-       id="text4400"
-       style="font-size:20.20119667px;fill:#c4c4c4;font-family:Quicksand-Regular">DEUX EMOTIONS ?</text>
-    <g
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="g4414">
-      <rect
-         width="176.396"
-         height="11.333"
-         x="377.272"
-         y="357.64001"
-         id="rect4416"
-         style="fill:none" />
-      <text
-         transform="translate(431.7285,365.3398)"
-         id="text4418"
-         style="font-size:11px;fill:#c4c4c4;font-family:Quicksand-Regular">INTENSITE ?</text>
-    </g>
-    <line
-       style="fill:#f4f4f4;stroke:#b5b4b5;stroke-width:0.4591181;stroke-miterlimit:10"
-       stroke-miterlimit="10"
-       x1="71.912186"
-       y1="900.90051"
-       x2="244.9817"
-       y2="900.90051"
-       id="line4420" />
-    <g
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="g4422"
-       style="opacity:0.4">
-      <g
-         id="g4424"
-         style="opacity:0.4">
-        <polyline
-           style="fill:none;stroke:#b5b4b5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1, 3"
-           points="    404,409.5 395.5,409.5 395.5,309.5 422,309.5   "
-           id="polyline4426" />
-        <g
-           id="g4428">
-          <polygon
-             points="406.55,409.5 404,412.052 404,406.949 "
-             id="polygon4430"
-             style="fill:#b5b4b5" />
-        </g>
-      </g>
-    </g>
-    <rect
-       width="331.08951"
-       height="55.577339"
-       x="4.1893392"
-       y="996.81622"
-       id="rect5058"
-       style="opacity:0.8;fill:#a9eff7" />
-    <circle
-       cx="531.82703"
-       cy="459.22101"
-       r="9.5609999"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="circle5060"
-       style="fill:none;stroke:#ffffff;stroke-width:0.25;stroke-miterlimit:10" />
-    <circle
-       cx="412.14401"
-       cy="459.22101"
-       r="9.5609999"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="circle5062"
-       style="fill:none;stroke:#ffffff;stroke-width:0.25;stroke-miterlimit:10" />
-    <circle
-       cx="472.272"
-       cy="459.22101"
-       r="14.062"
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="circle5064"
-       style="fill:#a9eff7;stroke:#ffffff;stroke-miterlimit:10" />
-    <g
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="g5066">
-      <line
-         style="fill:none;stroke:#ffffff;stroke-miterlimit:10"
-         stroke-miterlimit="10"
-         x1="531.82703"
-         y1="454.134"
-         x2="531.82703"
-         y2="464.30899"
-         id="line5068" />
-      <line
-         style="fill:none;stroke:#ffffff;stroke-miterlimit:10"
-         stroke-miterlimit="10"
-         x1="526.74103"
-         y1="459.22198"
-         x2="536.91302"
-         y2="459.22198"
-         id="line5070" />
-    </g>
-    <g
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="g5072">
-      <path
-         d="m 416.395,458.437 h -3.188 l 1.191,-1.191 c -0.603,-0.603 -1.403,-0.935 -2.255,-0.935 -0.85,0 -1.652,0.332 -2.253,0.935 -0.603,0.602 -0.935,1.402 -0.935,2.255 0,0.851 0.332,1.651 0.935,2.253 0.601,0.603 1.403,0.935 2.253,0.935 0.852,0 1.652,-0.332 2.255,-0.935 0.049,-0.05 0.099,-0.103 0.146,-0.155 l 0.799,0.7 c -0.779,0.89 -1.925,1.452 -3.199,1.452 -2.348,0 -4.25,-1.903 -4.25,-4.25 0,-2.35 1.902,-4.251 4.25,-4.251 1.174,0 2.237,0.476 3.006,1.244 l 1.245,-1.244 v 3.187 z"
-         id="path5074"
-         style="fill:#ffffff" />
-    </g>
-    <path
-       d="m 121.45146,1052.4008 c -4.93248,-8.0982 -7.75615,-17.5051 -7.75615,-27.5413 0,-10.2459 2.94218,-19.8339 8.06655,-28.04503"
-       id="path5076"
-       style="opacity:0.3;fill:none;stroke:#ffffff;stroke-width:1.83647239;stroke-miterlimit:10" />
-    <path
-       d="m 220.91187,996.81626 c 5.12437,8.20754 8.06656,17.79914 8.06656,28.04324 0,10.0344 -2.82368,19.4413 -7.75428,27.5359"
-       id="path5078"
-       style="opacity:0.3;fill:none;stroke:#ffffff;stroke-width:1.83647239;stroke-miterlimit:10" />
-    <path
-       d="m 147.72228,1052.4008 c -8.16437,-6.7034 -13.33387,-16.6284 -13.33387,-27.7062 0,-11.1747 5.26169,-21.1768 13.55209,-27.88372"
-       id="path5080"
-       style="opacity:0.6;fill:none;stroke:#ffffff;stroke-width:1.83647239;stroke-miterlimit:10" />
-    <path
-       d="m 197.55878,996.81088 c 8.28853,6.70512 13.54833,16.70722 13.54833,27.88372 0,11.0778 -5.16763,21.0028 -13.33199,27.7062"
-       id="path5082"
-       style="opacity:0.6;fill:none;stroke:#ffffff;stroke-width:1.83647239;stroke-miterlimit:10" />
-    <g
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="g5084">
-      <line
-         style="fill:none;stroke:#ffffff;stroke-miterlimit:10"
-         stroke-miterlimit="10"
-         x1="479.62299"
-         y1="454.552"
-         x2="470.42599"
-         y2="463.89099"
-         id="line5086" />
-      <line
-         style="fill:none;stroke:#ffffff;stroke-miterlimit:10"
-         stroke-miterlimit="10"
-         x1="465.58099"
-         y1="458.496"
-         x2="471.06201"
-         y2="463.89099"
-         id="line5088" />
-    </g>
-    <line
-       style="fill:none;stroke:#a9eff7;stroke-width:1.83647239;stroke-miterlimit:10"
-       stroke-miterlimit="10"
-       x1="7.9517193"
-       y1="588.95026"
-       x2="47.456715"
-       y2="588.95026"
-       id="line5090" />
-    <line
-       style="fill:none;stroke:#a9eff7;stroke-width:1.83647239;stroke-miterlimit:10"
-       stroke-miterlimit="10"
-       x1="7.9517193"
-       y1="599.70715"
-       x2="47.456715"
-       y2="599.70715"
-       id="line5092" />
-    <line
-       style="fill:none;stroke:#a9eff7;stroke-width:1.83647239;stroke-miterlimit:10"
-       stroke-miterlimit="10"
-       x1="7.9517193"
-       y1="610.46405"
-       x2="47.456715"
-       y2="610.46405"
-       id="line5094" />
-    <g
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="g5096"
-       style="opacity:0.4">
-      <g
-         id="g5098"
-         style="opacity:0.4">
-        <polyline
-           style="fill:none;stroke:#b5b4b5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1, 3"
-           points="    526,409.5 535.5,409.5 535.5,309.5 508,309.5   "
-           id="polyline5100" />
-        <g
-           id="g5102">
-          <polygon
-             points="524.45,409.5 527,406.948 527,412.051 "
-             id="polygon5104"
-             style="fill:#b5b4b5" />
-        </g>
-      </g>
-    </g>
-    <g
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="g5156">
-      <rect
-         width="30.802"
-         height="4.9879999"
-         x="417.09399"
-         y="276"
-         id="rect5158"
-         style="fill:none"
-         visibility="inherit" />
-      <text
-         transform="translate(417.0938,280.8999)"
-         id="text5160" visibility="inherit"
-         style="font-size:7px;fill:#f9f569;font-family:Quicksand-Regular">JOYEUX</text>
-    </g>
-	    <line visibility="inherit"
-	       style="fill:none;stroke:#f9f569;stroke-width:1.37735438;stroke-miterlimit:10"
-	       stroke-miterlimit="10"
-	       x1="97.296921"
-	       y1="709.16589"
-	       x2="97.296921"
-	       y2="727.27155"
-	       id="line5154" />
-    <g
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="g5441">
-      <g
-         id="g5443">
-        <g
-           id="g5445">
-          <linearGradient
-             x1="523.50677"
-             y1="223.15041"
-             x2="547.51947"
-             y2="223.15041"
-             id="linearGradient8659"
-             gradientUnits="userSpaceOnUse">
-            <stop
-               id="stop8661"
-               style="stop-color:#a9eff7;stop-opacity:1"
-               offset="0.29949999" />
-            <stop
-               id="stop8663"
-               style="stop-color:#fcb4ce;stop-opacity:1"
-               offset="0.89999998" />
-          </linearGradient>
-          <path
-             d="m 532.111,222.839 h 6.304 v 0.504 c 0,1.146 -0.135,2.16 -0.405,3.043 -0.264,0.817 -0.708,1.581 -1.333,2.292 -1.417,1.594 -3.218,2.391 -5.404,2.391 -2.135,0 -3.962,-0.771 -5.483,-2.312 -1.521,-1.548 -2.282,-3.405 -2.282,-5.572 0,-2.213 0.773,-4.09 2.321,-5.631 1.548,-1.548 3.432,-2.322 5.651,-2.322 1.192,0 2.306,0.243 3.34,0.728 0.987,0.485 1.959,1.274 2.914,2.365 l -1.64,1.571 c -1.252,-1.666 -2.776,-2.5 -4.575,-2.5 -1.613,0 -2.967,0.557 -4.061,1.67 -1.093,1.093 -1.64,2.463 -1.64,4.11 0,1.699 0.609,3.099 1.828,4.199 1.139,1.021 2.374,1.532 3.704,1.532 1.133,0 2.15,-0.381 3.054,-1.144 0.902,-0.769 1.406,-1.688 1.511,-2.759 h -3.804 v -2.165 z"
-             id="path5452"
-             style="fill:url(#SVGID_323_)" />
-          <linearGradient
-             x1="523.50677"
-             y1="223.15041"
-             x2="547.51947"
-             y2="223.15041"
-             id="linearGradient8666"
-             gradientUnits="userSpaceOnUse">
-            <stop
-               id="stop8668"
-               style="stop-color:#a9eff7;stop-opacity:1"
-               offset="0.29949999" />
-            <stop
-               id="stop8670"
-               style="stop-color:#fcb4ce;stop-opacity:1"
-               offset="0.89999998" />
-          </linearGradient>
-          <path
-             d="m 544.021,217.692 v 13.091 h -2.302 v -13.091 h -3.507 v -2.164 h 9.307 v 2.164 h -3.498 z"
-             id="path5459"
-             style="fill:url(#SVGID_324_)" />
-        </g>
-      </g>
-      <linearGradient
-         x1="537"
-         y1="224"
-         x2="544"
-         y2="224"
-         id="linearGradient8673"
-         gradientUnits="userSpaceOnUse">
-        <stop
-           id="stop8675"
-           style="stop-color:#cad8e7;stop-opacity:1"
-           offset="0" />
-        <stop
-           id="stop8677"
-           style="stop-color:#ced5e5;stop-opacity:1"
-           offset="0.2449" />
-        <stop
-           id="stop8679"
-           style="stop-color:#dccbde;stop-opacity:1"
-           offset="0.51340002" />
-        <stop
-           id="stop8681"
-           style="stop-color:#f1bcd3;stop-opacity:1"
-           offset="0.792" />
-        <stop
-           id="stop8683"
-           style="stop-color:#fcb4ce;stop-opacity:1"
-           offset="0.89999998" />
-      </linearGradient>
-      <rect
-         width="7"
-         height="2"
-         x="537"
-         y="223"
-         id="rect5472"
-         style="fill:url(#SVGID_325_)" />
-      <rect
-         width="4"
-         height="3"
-         x="520"
-         y="222"
-         id="rect5474"
-         style="fill:#a9eff7" />
-    </g>
-    <g
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="g5560">
-      <text
-         transform="translate(441.0156,280.8999)"
-         id="text5564"
-         style="font-size:7px;fill:#fcb4ce;font-family:Quicksand-Regular">SENTIMENTAL</text>
-    </g>
-    <line
-       style="fill:none;stroke:#fcb4ce;stroke-width:1.37735438;stroke-miterlimit:10"
-       stroke-miterlimit="10"
-       x1="159.85402"
-       y1="709.16589"
-       x2="159.85402"
-       y2="727.61395"
-       id="line5558" />
-    <g
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="g5568">
-      <rect
-         width="49.672001"
-         height="4.9879999"
-         x="473.96301"
-         y="276"
-         id="rect5570"
-         style="fill:none" />
-      <text
-         transform="translate(477.9463,280.8999)"
-         id="text5572"
-         style="font-size:7px;fill:#f8533d;font-family:Quicksand-Regular">COLERIQUE</text>
-    <line
-       style="fill:none;stroke:#f8533d;stroke-width:1.37735438;stroke-miterlimit:10"
-       stroke-miterlimit="10"
-       x1="222.02931"
-       y1="709.16589"
-       x2="222.02931"
-       y2="727.61395"
-       id="line5566" />
-    </g>
-    <g
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="g5574">
-      <rect
-         width="31.024"
-         height="4.9879999"
-         x="450.194"
-         y="335.66199"
-         id="rect5576"
-         style="fill:none" />
-      <text
-         transform="translate(454.8428,340.562)"
-         id="text5578"
-         style="font-size:7px;fill:#e6e8e8;font-family:Quicksand-Regular">FROID</text>
-    </g>
-    <line
-       style="fill:none;stroke:#e6e8e8;stroke-width:1.37735438;stroke-miterlimit:10"
-       stroke-miterlimit="10"
-       x1="159.77693"
-       y1="781.36615"
-       x2="159.77693"
-       y2="799.4718"
-       id="line5580" />
-    <g
-       transform="matrix(1.8811905,0,0,1.7928174,-716.30659,200.80532)"
-       id="g5582">
-      <rect
-         width="31.024"
-         height="4.9879999"
-         x="483.28601"
-         y="335.57999"
-         id="rect5584"
-         style="fill:none" />
-      <text
-         transform="translate(486.8389,340.48)"
-         id="text5586"
-         style="font-size:7px;fill:#a9eff7;font-family:Quicksand-Regular">CALME</text>
-    </g>
-    <line
-       style="fill:none;stroke:#a9eff7;stroke-width:1.37735438;stroke-miterlimit:10"
-       stroke-miterlimit="10"
-       x1="222.02931"
-       y1="781.21924"
-       x2="222.02931"
-       y2="799.32489"
-       id="line5588" />
-  </g>
-</svg>
+			<div id="contSvg1" style="text-align:center;">
+			<form id="rangeContainer" onsubmit="return false" oninput="out.value = valeur.valueAsNumber; gradient();">
+				<input type="range" min="0" max ="100" value="50" id="valeur" name="valeur">
+				<output name="out" id="out" for="valeur" >50</output>
+			</form>
+			
+
 			</div>
 	    </div><!-- #global -->
 	</td></tr></table>

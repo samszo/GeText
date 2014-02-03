@@ -7,22 +7,28 @@
 
 <script type="text/javascript">
 
-//This is the accessor function we talked about above
+//tableau des différents type de ligne
+var lineAffect = [{nom:"joyeux", interpolate:"basis", freq:"10", minY:0, maxY:30, couleur:"#FFFF00"}
+                  ,{nom:"colérique", interpolate:"linear", freq:"100", minY:0, maxY:40, couleur:"#F993A9"}
+                  ,{nom:"calme", interpolate:"basis", freq:"3", minY:-2, maxY:2, couleur:"#DD0A0A"}
+                  ,{nom:"froid", interpolate:"basis", freq:"6", minY:0, maxY:20, couleur:"#E7C5EA"}
+                  ,{nom:"sentimental", interpolate:"basis", freq:"50", minY:0, maxY:40, couleur:"#3B5A85"}
+                  ,{nom:"mélancolique", interpolate:"bundle", freq:"10", minY:0, maxY:20, couleur:"#A8E5F6"}
+                  ];
+var sltAfct = "basis";
+//fonction qui transforme un tableau de données en ligne
+var large = 400, haut = 150;
 var lineFunction = d3.svg.line()
-                         .x(function(d) { return d.x; })
-                         .y(function(d) { return d.y; })
-                         .interpolate("basis");
+      .x(function(d) { return d.x; })
+      .y(function(d) { return d.y; })
+      .interpolate(sltAfct);
 
 function init(){
-	//The data for our line
-	var lineData = getAleaData(100, 0, 100);
 		
 	//The SVG Container
 	var svgContainer = d3.select("#curve").append("svg")
-	                                    .attr("width", 400)
-	                                    .attr("height", 150);
-	
-	
+	                                    .attr("width", large)
+	                                    .attr("height", haut);
 
 	var lineDefs = svgContainer.append("defs");
 	
@@ -39,6 +45,9 @@ function init(){
 		.attr("offset","55%")
 		.attr("stop-color","#000");
 	
+	//The data for our line
+	var afct = lineAffect[2];
+	var lineData = getAleaData(afct.freq, afct.minY, afct.maxY);
 	//The line SVG Path we draw
 	var lineGraph = svgContainer.append("path")
        .attr("class", "line")
@@ -49,11 +58,53 @@ function init(){
 	
 }
 
+function transition(path, d0, d1) {
+	  path.transition()
+	      .duration(2000)
+	      .attrTween("d", pathTween(d1, 4));
+	      //.each("end", function() { d3.select(this).call(transition, d1, d0); });
+	}
+
+function pathTween(d1, precision) {
+  return function() {
+    var path0 = this,
+        path1 = path0.cloneNode(),
+        n0 = path0.getTotalLength(),
+        n1 = (path1.setAttribute("d", d1), path1).getTotalLength();
+
+    // Uniform sampling of distance based on specified precision.
+    var distances = [0], i = 0, dt = precision / Math.max(n0, n1);
+    while ((i += dt) < 1) distances.push(i);
+    distances.push(1);
+
+    // Compute point-interpolators at each distance.
+    var points = distances.map(function(t) {
+      var p0 = path0.getPointAtLength(t * n0),
+          p1 = path1.getPointAtLength(t * n1);
+      return d3.interpolate([p0.x, p0.y], [p1.x, p1.y]);
+    });
+
+    return function(t) {
+      return t < 1 ? "M" + points.map(function(p) { return p(t); }).join("L") : d1;
+    };
+  };
+}
+
 function anime(){
-	var data = getAleaData(Math.floor((400)*Math.random()+1), 0, Math.floor((100)*Math.random()+1));
-	   d3.select(".line").transition()
-       .duration(3000)
-       .attr("d", lineFunction(data));
+	//récupère les paramètre de l'affection
+	var afct = lineAffect[Math.floor((5)*Math.random())];
+	d3.select("#afct").text(afct.nom);
+	//précise l'interpolation sélectionnée
+	sltAfct = afct.interpolate;
+	//calcule les données de la ligne
+	var data = getAleaData(afct.freq, afct.minY, afct.maxY);
+	//calcule les coordonnées de la ligne avec les paramètre de l'affection
+	var d1 = lineFunction(data);
+	//récupère les coordonnés de la ligne initiale
+	var path = d3.select(".line");
+	var d0 = path.attr("d");
+	//affiche la transition entre les deux lignes
+	transition(path, d0, d1);
 }
 function animeReset(){
 	d3.select(".line").transition()
@@ -64,7 +115,7 @@ function animeReset(){
 
 function getAleaData(freq, minY, maxY){
 	var data = [];
-	var pas = 400/freq;
+	var pas = large/freq;
 	for (var i=0;i<freq;i++)
 	{ 
 		var y =  Math.floor((maxY-minY)*Math.random())+minY; 
@@ -128,25 +179,9 @@ function gradient(){
 			couleur2 = document.getElementById('colour6bis').value;
 		}
 		
-		//Dégradé d'arrière plan du input "range"
-		
-		function gradient2(){
-		
-			var grad2 = document.getElementById('out').value;
-			var grad2Neg = grad2*-1;
-		
-			var a = grad2-30;
-			var b = 30-grad2Neg;
-		
-			var test = document.getElementById('rangeContainer');
-			test.style.background="linear-gradient(90deg, #" + couleur1 + " " + a + "%, #" + couleur2 + " " + b + "%)";
-
-		}
-		
-		gradient2();
+		gradientFond(couleur1, couleur2);
 
 		//Dégradé de la courbe
-		
 		var color1 = document.getElementById("first");
 			color1.setAttribute('offset', grad1*-1 + '%');
 			color1.setAttribute('stop-color', "#" +  couleur1);
@@ -155,6 +190,20 @@ function gradient(){
 			color2.setAttribute('stop-color', "#" + couleur2);
 
 	};
+
+	//Dégradé d'arrière plan du input "range"		
+	function gradientFond(couleur1, couleur2){
+	
+		var grad2 = document.getElementById('out').value;
+		var grad2Neg = grad2*-1;
+	
+		var a = grad2-30;
+		var b = 30-grad2Neg;
+	
+		var test = document.getElementById('rangeContainer');
+		test.style.background="linear-gradient(90deg, #" + couleur1 + " " + a + "%, #" + couleur2 + " " + b + "%)";
+	}
+	
 </script>
 <style>
 	body{
@@ -185,7 +234,7 @@ function gradient(){
 </style>
 </head>
 <body onload="init()">
-	<div onclick="animeReset();" >Changer le tracé</div>
+	<div onclick="anime();" >Changer le tracé<div id="afct"></div></div>
 	<form id="colourChoices1" name="colourChoices">
 		<input type="radio" name="colour1" id="colour1" value="FFFF00" onclick="gradient();" >
 		<input type="radio" name="colour1" id="colour2" value="F993A9" onclick="gradient();" >
