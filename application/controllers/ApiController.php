@@ -18,6 +18,7 @@ class ApiController extends Zend_Controller_Action
     	$this->view->params = $this->_request->getQuery();
     	
 	    $uri = $this->uri."?oeu=".$this->oeu."&cpt=".$this->cpt."&nb=1&frt=frg";
+	    //echo $uri;
 	    $http = new Zend_Http_Client($uri);
 		$html = $http->request();
 		$this->view->params["texte"] = $html->getBody();
@@ -25,11 +26,17 @@ class ApiController extends Zend_Controller_Action
 
     public function savetextAction()
     {
-    	if ($this->_getParam('texte', 0)){
+    	if ($this->_getParam('texte', 0) && $this->_getParam('params', 0)){
     		$dbP = new Model_DbTable_Gt_poemes();
-    		$this->view->idP = $dbP->ajouter(array("texte"=>$this->_getParam('texte'),"params"=>$this->_getParam('params')));
+    		$idP = $dbP->ajouter(array("texte"=>$this->_getParam('texte'),"params"=>json_encode($this->_getParam('params'))));
+    		$params = $this->_getParam('params');
+    		//calcule l'url courte
+    		$g = new Flux_Gurl();
+    		$url = 	WEB_ROOT_AJAX.$params["pro"]."?idPoeme=".$idP;
+			$urlCourte = $g->getShortUrl($url);
+			$this->view->result = array("idP"=>$idP, "urlCourte"=>$urlCourte);
     	}else{
-    		$this->view->idP = false;
+    		$this->view->result = false;
     	}
     	
     	
